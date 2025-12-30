@@ -9,7 +9,8 @@
         "alarms",
         "idle",
         "system.memory",
-        "contextMenus"
+        "contextMenus",
+        "nativeMessaging"
     ],
     "host_permissions": [],
     "background": {

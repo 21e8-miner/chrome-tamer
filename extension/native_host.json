@@ -1,0 +1,9 @@
+{
+    "name": "com.chrometamer.native",
+    "description": "Chrome Tamer Native Messaging Host",
+    "path": "/usr/local/bin/chrome_tamer_host.py",
+    "type": "stdio",
+    "allowed_origins": [
+        "chrome-extension://EXTENSION_ID_PLACEHOLDER/"
+    ]
+}
