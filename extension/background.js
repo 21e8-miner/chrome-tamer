@@ -51,12 +51,12 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
 });
 
-// --- Equilibrium Heartbeat ---
-chrome.alarms.create("equilibriumCycle", { periodInMinutes: 1 });
+// --- Memory Pressure Monitor (Runs every minute) ---
+chrome.alarms.create("memoryPressureCycle", { periodInMinutes: 1 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-    if (alarm.name === "equilibriumCycle") {
-        await computeNashEquilibrium();
+    if (alarm.name === "memoryPressureCycle") {
+        await pruneByMemoryPressure();
     }
 });
 
@@ -74,15 +74,28 @@ async function getMemoryPressure() {
     });
 }
 
-async function computeNashEquilibrium() {
-    // 0. Update Pressure Metric
+async function pruneByMemoryPressure() {
+    // 0. Check Current Memory Pressure
     const pressure = await getMemoryPressure();
+
+    // CRITICAL: Only prune if pressure exceeds threshold (75%)
+    const PRESSURE_THRESHOLD = 0.75;
+    if (pressure < PRESSURE_THRESHOLD) {
+        console.log(`[Skip] Memory pressure acceptable (${(pressure * 100).toFixed(1)}% < ${PRESSURE_THRESHOLD * 100}%)`);
+        await chrome.storage.local.set({
+            lastPressure: pressure,
+            lastPruned: 0
+        });
+        return;
+    }
+
+    console.log(`[Prune] Memory pressure high (${(pressure * 100).toFixed(1)}%), starting eviction...`);
 
     // 1. Get inactive tabs
     const tabs = await chrome.tabs.query({ active: false, discarded: false, audible: false });
     const { userExclusions } = await chrome.storage.local.get("userExclusions");
 
-    // 2. Calculate Domain Density for Competition Cost
+    // 2. Calculate Domain Density for Redundancy Penalty
     const domainCounts = {};
     tabs.forEach(t => {
         try {
@@ -93,22 +106,22 @@ async function computeNashEquilibrium() {
         } catch (e) { }
     });
 
-    // 3. Evaluate Utility for Each Player (Tab)
+    // 3. Score and Prune Low-Utility Tabs
     let prunedCount = 0;
     for (const tab of tabs) {
         if (!tab.url || isProtected(tab.url, userExclusions)) continue;
 
         const { score, reason } = calculateTabUtility(tab, domainCounts, pressure);
 
-        // 4. Prune Dominated Strategies (Negative Utility)
+        // Discard tabs with negative utility
         if (score < 0) {
-            console.log(`[Outcome] Pruning ${tab.title} (Utility: ${score.toFixed(2)}, Reason: ${reason}, Pressure: ${(pressure * 100).toFixed(1)}%)`);
+            console.log(`[Discard] ${tab.title} (Score: ${score.toFixed(2)}, Reason: ${reason})`);
             await deallocateResource(tab);
             prunedCount++;
         }
     }
 
-    // Update Equilibrium Pressure for UI
+    // Update telemetry for UI
     await chrome.storage.local.set({
         lastPressure: pressure,
         lastPruned: prunedCount
