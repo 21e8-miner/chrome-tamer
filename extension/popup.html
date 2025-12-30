@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      width: 320px;
+      background: #0a0a0f;
+      color: white;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 20px;
+      margin: 0;
+      border: 1px solid #333;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #00d9ff, #0080ff);
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: #00d9ff;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #888;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00d9ff, #0080ff);
+      color: #000;
+      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #a0a0b0;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .status-bar {
+      margin-top: 20px;
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .pulse {
+      width: 6px;
+      height: 6px;
+      background: #00ff88;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00ff88;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.5;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="brand">
+      <div class="logo">C</div>
+      <h1>Chrome Tamer</h1>
+    </div>
+    <div style="font-size: 10px; color: #444; border: 1px solid #333; padding: 2px 6px; border-radius: 4px;">PRO</div>
+  </div>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-val" id="savedMem">0<span style="font-size: 14px">MB</span></div>
+      <div class="stat-label">RAM Saved</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="tamedTabs">0</div>
+      <div class="stat-label">Tabs Tamed</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="focusModeBtn">
+      <span>⚡ Focus Mode (Panic Button)</span>
+    </button>
+    <button class="btn btn-secondary" id="whitelistBtn">
+      <span>🛡️ Whitelist Current Site</span>
+    </button>
+  </div>
+
+  <div class="status-bar">
+    <div class="pulse"></div>
+    <span>Engine Active • v1.1</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

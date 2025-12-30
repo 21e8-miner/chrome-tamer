@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Chrome Tamer - Stop Chrome from eating your RAM. Lightweight memory optimizer that automatically manages background tabs.">
+    <title>Chrome Tamer - Tame Your Browser's Memory Hunger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a2e;
+            --accent: #00d9ff;
+            --accent-glow: rgba(0, 217, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff4466;
+            --border: #2a2a3e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 255, 136, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 24px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 15, 0.8);
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), #0080ff);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 160px 0 100px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent) 0%, #00ff88 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #0080ff);
+            color: #000;
+            box-shadow: 0 4px 24px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent);
+        }
+
+        /* Stats Showcase */
+        .stats-showcase {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            padding: 60px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Before/After Comparison */
+        .comparison {
+            padding: 80px 0;
+        }
+
+        .comparison h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comparison-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-card.before {
+            border-color: rgba(255, 68, 102, 0.3);
+        }
+
+        .comparison-card.after {
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .comparison-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .comparison-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .before .comparison-icon {
+            background: rgba(255, 68, 102, 0.2);
+        }
+
+        .after .comparison-icon {
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        .comparison-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .memory-bar {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            height: 40px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .memory-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding-left: 16px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: width 1s ease;
+        }
+
+        .before .memory-fill {
+            background: linear-gradient(90deg, var(--danger), #ff6688);
+            width: 85%;
+        }
+
+        .after .memory-fill {
+            background: linear-gradient(90deg, var(--success), #00cc66);
+            width: 25%;
+        }
+
+        .memory-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Features Grid */
+        .features {
+            padding: 80px 0;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        /* Pricing */
+        .pricing {
+            padding: 80px 0;
+        }
+
+        .pricing h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--accent), #0080ff);
+            color: #000;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .pricing-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 800;
+        }
+
+        .pricing-price span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .pricing-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9375rem;
+        }
+
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+
+        .check {
+            color: var(--success);
+        }
+
+        .x {
+            color: var(--text-secondary);
+        }
+
+        /* FAQ */
+        .faq {
+            padding: 80px 0;
+        }
+
+        .faq h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+        }
+
+        .faq-list {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            padding: 0 24px 20px;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <div class="logo-icon">🦁</div>
+                <span>Chrome Tamer</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                🚀 Beta Testing Phase 1 - v1.0.0-RC
+            </div>
+            <h1>Stop Chrome from<br><span>Eating Your RAM</span></h1>
+            <p>Lightweight memory optimizer that automatically tames background tabs. Reclaim gigabytes of RAM without
+                closing a single tab.</p>
+            <div class="hero-buttons">
+                <a href="/download" class="btn btn-primary">
+                    ⬇️ Download Beta RC
+                </a>
+                <a href="#pricing" class="btn btn-secondary">
+                    View Pricing
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-showcase">
+        <div class="stat-item">
+            <div class="stat-value">4GB+</div>
+            <div class="stat-label">Average RAM Saved</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">27%</div>
+            <div class="stat-label">Faster System</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">&lt;1%</div>
+            <div class="stat-label">CPU Usage</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">15MB</div>
+            <div class="stat-label">App Size</div>
+        </div>
+    </section>
+
+    <!-- Before/After -->
+    <section class="comparison">
+        <div class="container">
+            <h2>See the Difference</h2>
+            <div class="comparison-grid">
+                <div class="comparison-card before">
+                    <div class="comparison-header">
+                        <div class="comparison-icon">😱</div>
+                        <div class="comparison-title">Before Chrome Tamer</div>
+                    </div>
+                    <div class="memory-bar">
+                        <div class="memory-fill">8.2 GB Used</div>
+                    </div>
+                    <div class="memory-label">Chrome with 30 tabs open</div>
+                </div>
+                <div class="comparison-card after">
+                    <div class="comparison-header">
+                        <div class="comparison-icon">😎</div>
+                        <div class="comparison-title">After Chrome Tamer</div>
+                    </div>
+                    <div class="memory-bar">
+                        <div class="memory-fill">2.1 GB</div>
+                    </div>
+                    <div class="memory-label">Same 30 tabs, tamed</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Powerful Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">Smart Detection</div>
+                    <div class="feature-desc">Automatically detects which tab you're using and which ones are idle in
+                        the background.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧹</div>
+                    <div class="feature-title">Memory Squashing</div>
+                    <div class="feature-desc">Reclaims memory from bloated background tabs without affecting your active
+                        work.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">Priority Boost</div>
+                    <div class="feature-desc">Gives your active tab priority access to CPU cores for snappier
+                        performance.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Real-time Stats</div>
+                    <div class="feature-desc">See exactly how much RAM you've saved with the floating stats dashboard.
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔋</div>
+                    <div class="feature-title">Battery Friendly</div>
+                    <div class="feature-desc">Uses less than 1% CPU and runs silently in your system tray.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-title">Safe & Private</div>
+                    <div class="feature-desc">No data collection, no internet required. 100% offline operation.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2>Simple Pricing</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <div class="pricing-name">Free</div>
+                        <div class="pricing-price">$0</div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> Background tab taming</li>
+                        <li><span class="check">✓</span> Memory reclamation (200MB+)</li>
+                        <li><span class="check">✓</span> System tray app</li>
+                        <li><span class="check">✓</span> Basic stats view</li>
+                        <li><span class="x">✗</span> Aggressive mode</li>
+                        <li><span class="x">✗</span> Auto-start with Windows</li>
+                    </ul>
+                    <a href="/download" class="btn btn-secondary" style="width: 100%; justify-content: center;">Download
+                        Beta</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">Best Value</div>
+                    <div class="pricing-header">
+                        <div class="pricing-name">Premium</div>
+                        <div class="pricing-price">$4.99 <span>one-time</span></div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✓</span> Everything in Free</li>
+                        <li><span class="check">✓</span> Aggressive mode (100MB+)</li>
+                        <li><span class="check">✓</span> Faster polling (500ms)</li>
+                        <li><span class="check">✓</span> Auto-start with Windows</li>
+                        <li><span class="check">✓</span> Lifetime updates</li>
+                        <li><span class="check">✓</span> Priority support</li>
+                    </ul>
+                    <a href="https://gumroad.com" class="btn btn-primary"
+                        style="width: 100%; justify-content: center;">Get Premium</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-list">
+                <div class="faq-item active">
+                    <div class="faq-question">
+                        Is this safe to use?
+                        <span>▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes! Chrome Tamer uses official Windows APIs to manage memory. It doesn't modify Chrome or any
+                        system files. The worst that can happen is a background tab needs to reload when you switch to
+                        it.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Will my tabs lose their content?
+                        <span>▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        No. We only trim unused memory from background tabs. Your tab state, forms, and scroll position
+                        are preserved. Switching to a tamed tab may cause a brief reload, but nothing is lost.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Does it work with other browsers?
+                        <span>▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Currently Chrome Tamer is optimized for Google Chrome. Edge, Brave, and other Chromium browsers
+                        may work but aren't officially supported yet. Firefox support is planned.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        What's the difference between Free and Premium?
+                        <span>▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Free mode tames tabs using 200MB+ of RAM. Premium drops this to 100MB and polls twice as fast
+                        (500ms vs 1s), meaning more aggressive memory savings. Premium also includes auto-start and
+                        lifetime updates.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2024 Chrome Tamer. Built with Advanced System Optimization.</p>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                q.parentElement.classList.toggle('active');
+            });
+        });
+
+        // Animate memory bars on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.width = entry.target.dataset.width;
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.memory-fill').forEach(bar => {
+            const width = getComputedStyle(bar).width;
+            bar.dataset.width = width;
+            bar.style.width = '0';
+            observer.observe(bar);
+        });
+    </script>
+</body>
+
+</html>
