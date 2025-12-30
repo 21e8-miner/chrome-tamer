@@ -21,9 +21,9 @@
                 <span>Chrome Tamer</span>
             </div>
             <nav class="nav-links">
+                <a href="#about">About</a>
                 <a href="#features">Features</a>
                 <a href="#pricing">Pricing</a>
-                <a href="#faq">FAQ</a>
             </nav>
         </div>
     </header>
@@ -31,29 +31,32 @@
     <main>
         <section class="hero">
             <div class="container">
-                <div class="hero-badge">🚀 Production Ready v1.0.0</div>
+                <div class="hero-badge">🧬 Nash Equilibrium Engine v2.2</div>
                 <h1>Reclaim Your RAM <span>Tame Your Browser</span></h1>
-                <p>The lightweight automated optimizer that tames background processes, reduces system latency, and
-                    gives you back gigabytes of memory.</p>
+                <p>A game-theoretic optimizer that treats background tabs as non-cooperative players. Reclaim gigabytes
+                    of memory by pruning dominated resource strategies.</p>
                 <div class="hero-buttons">
-                    <a href="./ChromeTamer_Setup.exe" class="btn btn-primary" download>⬇️ Download for Windows</a>
-                    <a href="#pricing" class="btn btn-secondary">Get Premium Upgrade</a>
+                    <a href="https://github.com/21e8-miner/chrome-tamer" class="btn btn-primary">📦 Get the Source
+                        (v2.2)</a>
+                    <a href="#features" class="btn btn-secondary">Explore the Logic</a>
                 </div>
+                <div style="margin-top: 24px; font-size: 0.8rem; color: var(--text-secondary);">Available for macOS &
+                    Windows</div>
             </div>
         </section>
 
         <section class="stats-showcase">
             <div class="stat-item">
-                <div class="stat-value">4.2GB</div>
-                <div class="stat-label">Avg Saved</div>
+                <div class="stat-value">NASH</div>
+                <div class="stat-label">Logic Model</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">27%</div>
-                <div class="stat-label">Faster CPU</div>
+                <div class="stat-value">v2.2</div>
+                <div class="stat-label">Engine Core</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">0%</div>
-                <div class="stat-label">System Lag</div>
+                <div class="stat-value">REAL</div>
+                <div class="stat-label">No Simulation</div>
             </div>
         </section>
 
@@ -85,23 +88,44 @@
             </div>
         </section>
 
+        <section class="about" id="about" style="padding: 100px 0; background: rgba(0,0,0,0.2);">
+            <div class="container">
+                <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                    <h2 style="font-size: 2.5rem; margin-bottom: 32px;">Why Chrome Tamer?</h2>
+                    <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 24px;">
+                        Standard browsers are "greedy" players. They over-allocate resources to inactive tabs, assuming
+                        infinite memory availability. In reality, memory is a finite commons.
+                    </p>
+                    <p style="font-size: 1.1rem; color: var(--text-secondary);">
+                        Chrome Tamer implements a <strong>Nash Equilibrium</strong> for your system. By treating every
+                        tab as a rational agent with a decaying utility score, we ensure that resources are only held by
+                        processes that provide active benefit. When system pressure rises, low-utility "players" are
+                        forced to deallocate, preserving the stability of the entire system.
+                    </p>
+                </div>
+            </div>
+        </section>
+
         <section class="features" id="features">
             <div class="container">
                 <div class="features-grid">
                     <div class="feature-card">
-                        <span class="feature-icon">🎯</span>
-                        <h3 class="feature-title">Focus Isolation</h3>
-                        <p class="feature-desc">Instantly boosts the CPU priority of the tab you're actually using.</p>
+                        <span class="feature-icon">🧠</span>
+                        <h3 class="feature-title">Nash Equilibrium</h3>
+                        <p class="feature-desc">Tabs bid for resources. Low-utility background tabs are pruned
+                            alphabetically or by domain redundancy when system pressure spikes.</p>
                     </div>
                     <div class="feature-card">
-                        <span class="feature-icon">🧹</span>
-                        <h3 class="feature-title">Smart Squashing</h3>
-                        <p class="feature-desc">Reclaims memory from idle background tabs via hardened Windows APIs.</p>
+                        <span class="feature-icon">⚡</span>
+                        <h3 class="feature-title">Pressure Awareness</h3>
+                        <p class="feature-desc">Dynamically scales aggressiveness based on real-time Windows/macOS
+                            memory pressure metrics (0.0 to 1.0).</p>
                     </div>
                     <div class="feature-card">
-                        <span class="feature-icon">🛡️</span>
-                        <h3 class="feature-title">Zero Configuration</h3>
-                        <p class="feature-desc">Runs silently in the tray. No setup required, it just works.</p>
+                        <span class="feature-icon">⛓️</span>
+                        <h3 class="feature-title">Native Kernel</h3>
+                        <p class="feature-desc">Binds background Chromium renders to Efficiency Cores (Windows) or
+                            renices them to IDLE priority (macOS).</p>
                     </div>
                 </div>
             </div>
@@ -116,22 +140,23 @@
                         <ul style="list-style: none; margin-bottom: 32px; color: var(--text-secondary);">
                             <li>✓ Standard Taming</li>
                             <li>✓ Support for Chrome & Edge</li>
-                            <li>✓ Basic Dashboard</li>
+                            <li>✓ Native Benchmarking</li>
                         </ul>
-                        <a href="./ChromeTamer_Setup.exe" class="btn btn-secondary"
-                            style="width: 100%; justify-content: center;" download>Start for Free</a>
+                        <a href="https://github.com/21e8-miner/chrome-tamer" class="btn btn-secondary"
+                            style="width: 100%; justify-content: center;">View on Github</a>
                     </div>
                     <div class="pricing-card featured">
                         <h3>Pro Edition</h3>
                         <div style="font-size: 2.5rem; font-weight: 800; margin: 16px 0;">$4.99</div>
                         <ul style="list-style: none; margin-bottom: 32px;">
-                            <li>✓ Aggressive Taming (100MB threshold)</li>
-                            <li>✓ All Chromium Browsers</li>
-                            <li>✓ Priority CPU Scheduling</li>
-                            <li>✓ Auto-start with Windows</li>
+                            <li>✓ Aggressive Equilibrium (100MB threshold)</li>
+                            <li>✓ Windows E-Core Isolation</li>
+                            <li>✓ macOS Priority Renicing</li>
+                            <li>✓ Hyperfocus Profiles (Work/Gaming)</li>
+                            <li>✓ Background Network Throttling</li>
                         </ul>
-                        <a href="https://gumroad.com" class="btn btn-primary"
-                            style="width: 100%; justify-content: center;">Upgrade to Pro</a>
+                        <a href="https://github.com/21e8-miner/chrome-tamer/releases" class="btn btn-primary"
+                            style="width: 100%; justify-content: center;">Get Version 2.2</a>
                     </div>
                 </div>
             </div>
@@ -140,7 +165,7 @@
 
     <footer style="padding: 100px 0 50px; text-align: center; border-top: 1px solid var(--border);">
         <div class="container">
-            <p style="color: var(--text-secondary);">&copy; 2024 Chrome Tamer Optimization. All rights reserved.</p>
+            <p style="color: var(--text-secondary);">&copy; 2025 Chrome Tamer Optimization. All rights reserved.</p>
         </div>
     </footer>
 

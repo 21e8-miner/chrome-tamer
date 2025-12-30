@@ -1,0 +1,9 @@
+{
+    "public": true,
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/landing/$1"
+        }
+    ]
+}

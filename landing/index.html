@@ -139,12 +139,14 @@
             margin-bottom: 24px;
             background: linear-gradient(135deg, #ffffff 0%, #a0a0b0 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .hero h1 span {
             background: linear-gradient(135deg, var(--accent) 0%, #00ff88 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -564,66 +566,68 @@
     <section class="hero">
         <div class="container">
             <div class="hero-badge">
-                🚀 Beta Testing Phase 1 - v1.0.0-RC
+                🧬 Nash Equilibrium Engine v2.3 (Stable)
             </div>
-            <h1>Stop Chrome from<br><span>Eating Your RAM</span></h1>
-            <p>Lightweight memory optimizer that automatically tames background tabs. Reclaim gigabytes of RAM without
-                closing a single tab.</p>
+            <h1>Reclaim Your RAM<br><span>Tame Your Browser</span></h1>
+            <p>A game-theoretic resource allocator that treats background tabs as non-cooperative players. Enforce
+                system equilibrium and reclaim gigabytes of memory.</p>
             <div class="hero-buttons">
-                <a href="/download" class="btn btn-primary">
-                    ⬇️ Download Beta RC
+                <a href="https://github.com/21e8-miner/chrome-tamer" class="btn btn-primary">
+                    📦 Get the Source (Github)
                 </a>
-                <a href="#pricing" class="btn btn-secondary">
-                    View Pricing
+                <a href="#features" class="btn btn-secondary">
+                    How it Works
                 </a>
             </div>
+            <div style="margin-top: 24px; font-size: 0.8rem; color: var(--text-secondary);">Native Kernel support for
+                macOS & Windows</div>
         </div>
     </section>
 
     <!-- Stats -->
     <section class="stats-showcase">
         <div class="stat-item">
-            <div class="stat-value">4GB+</div>
-            <div class="stat-label">Average RAM Saved</div>
+            <div class="stat-value">250MB</div>
+            <div class="stat-label">Avg Saved Per Tab</div>
         </div>
         <div class="stat-item">
-            <div class="stat-value">27%</div>
-            <div class="stat-label">Faster System</div>
+            <div class="stat-value">v2.3</div>
+            <div class="stat-label">Engine Version</div>
         </div>
         <div class="stat-item">
-            <div class="stat-value">&lt;1%</div>
-            <div class="stat-label">CPU Usage</div>
+            <div class="stat-value">NASH</div>
+            <div class="stat-label">Logic Model</div>
         </div>
         <div class="stat-item">
-            <div class="stat-value">15MB</div>
-            <div class="stat-label">App Size</div>
+            <div class="stat-value">100%</div>
+            <div class="stat-label">Open Source</div>
         </div>
     </section>
 
     <!-- Before/After -->
     <section class="comparison">
         <div class="container">
-            <h2>See the Difference</h2>
+            <h2>See the Equilibrium</h2>
             <div class="comparison-grid">
                 <div class="comparison-card before">
                     <div class="comparison-header">
                         <div class="comparison-icon">😱</div>
-                        <div class="comparison-title">Before Chrome Tamer</div>
+                        <div class="comparison-title">Stock Browser</div>
                     </div>
                     <div class="memory-bar">
-                        <div class="memory-fill">8.2 GB Used</div>
+                        <div class="memory-fill">9.4 GB Used</div>
                     </div>
-                    <div class="memory-label">Chrome with 30 tabs open</div>
+                    <div class="memory-label">Greedy resource allocation, system jitter</div>
                 </div>
                 <div class="comparison-card after">
                     <div class="comparison-header">
-                        <div class="comparison-icon">😎</div>
-                        <div class="comparison-title">After Chrome Tamer</div>
+                        <div class="comparison-icon">⚡</div>
+                        <div class="comparison-title">Tamed Browser</div>
                     </div>
                     <div class="memory-bar">
-                        <div class="memory-fill">2.1 GB</div>
+                        <div class="memory-fill">2.4 GB</div>
                     </div>
-                    <div class="memory-label">Same 30 tabs, tamed</div>
+                    <div class="memory-label">Nash Equilibrium enforced, zero-lag</div>
                 </div>
             </div>
         </div>
@@ -632,41 +636,43 @@
     <!-- Features -->
     <section class="features" id="features">
         <div class="container">
-            <h2>Powerful Features</h2>
+            <h2>Engineering Core</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <div class="feature-title">Smart Detection</div>
-                    <div class="feature-desc">Automatically detects which tab you're using and which ones are idle in
-                        the background.</div>
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-title">Nash Equilibrium</div>
+                    <div class="feature-desc">Tabs "bid" for resources. Redundant background clones are deallocated when
+                        their utility score turns negative.</div>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🧹</div>
-                    <div class="feature-title">Memory Squashing</div>
-                    <div class="feature-desc">Reclaims memory from bloated background tabs without affecting your active
-                        work.</div>
+                    <div class="feature-icon">🌊</div>
+                    <div class="feature-title">Pressure Awareness</div>
+                    <div class="feature-desc">Dynamically scales pruning intensity based on real-time Windows/macOS
+                        memory pressure metrics.</div>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <div class="feature-title">Priority Boost</div>
-                    <div class="feature-desc">Gives your active tab priority access to CPU cores for snappier
-                        performance.</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <div class="feature-title">Real-time Stats</div>
-                    <div class="feature-desc">See exactly how much RAM you've saved with the floating stats dashboard.
-                    </div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔋</div>
-                    <div class="feature-title">Battery Friendly</div>
-                    <div class="feature-desc">Uses less than 1% CPU and runs silently in your system tray.</div>
+                    <div class="feature-icon">⛓️</div>
+                    <div class="feature-title">Native Kernel</div>
+                    <div class="feature-desc">Isolates background renders to E-Cores (Windows) or renices them to IDLE
+                        priority (macOS).</div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🛡️</div>
-                    <div class="feature-title">Safe & Private</div>
-                    <div class="feature-desc">No data collection, no internet required. 100% offline operation.</div>
+                    <div class="feature-title">Protected Contexts</div>
+                    <div class="feature-desc">Built-in whitelist for Github, Meet, YouTube, and local dev environments
+                        to prevent accidental pruning.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔋</div>
+                    <div class="feature-title">Zero Jitter</div>
+                    <div class="feature-desc">Reduces CPU contention by up to 30%, increasing battery life and ensuring
+                        snappier system responses.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Transparent Logic</div>
+                    <div class="feature-desc">The dashboard shows you exactly why a tab is targeted (Idle, Redundant, or
+                        Pressure).</div>
                 </div>
             </div>
         </div>
@@ -675,40 +681,38 @@
     <!-- Pricing -->
     <section class="pricing" id="pricing">
         <div class="container">
-            <h2>Simple Pricing</h2>
+            <h2>Licensing</h2>
             <div class="pricing-grid">
                 <div class="pricing-card">
                     <div class="pricing-header">
-                        <div class="pricing-name">Free</div>
+                        <div class="pricing-name">Community</div>
                         <div class="pricing-price">$0</div>
                     </div>
                     <ul class="pricing-features">
-                        <li><span class="check">✓</span> Background tab taming</li>
-                        <li><span class="check">✓</span> Memory reclamation (200MB+)</li>
-                        <li><span class="check">✓</span> System tray app</li>
-                        <li><span class="check">✓</span> Basic stats view</li>
-                        <li><span class="x">✗</span> Aggressive mode</li>
-                        <li><span class="x">✗</span> Auto-start with Windows</li>
+                        <li><span class="check">✓</span> Standard Nash Taming</li>
+                        <li><span class="check">✓</span> Memory reclamation</li>
+                        <li><span class="check">✓</span> Extension & Core UI</li>
+                        <li><span class="x">✗</span> E-Core Isolation</li>
+                        <li><span class="x">✗</span> QoS taskpolicy (macOS)</li>
                     </ul>
-                    <a href="/download" class="btn btn-secondary" style="width: 100%; justify-content: center;">Download
-                        Beta</a>
+                    <a href="https://github.com/21e8-miner/chrome-tamer" class="btn btn-secondary"
+                        style="width: 100%; justify-content: center;">Source Code</a>
                 </div>
                 <div class="pricing-card featured">
-                    <div class="pricing-badge">Best Value</div>
+                    <div class="pricing-badge">System Moat</div>
                     <div class="pricing-header">
-                        <div class="pricing-name">Premium</div>
-                        <div class="pricing-price">$4.99 <span>one-time</span></div>
+                        <div class="pricing-name">Pro Edition</div>
+                        <div class="pricing-price">$4.99 <span>seat</span></div>
                     </div>
                     <ul class="pricing-features">
                         <li><span class="check">✓</span> Everything in Free</li>
-                        <li><span class="check">✓</span> Aggressive mode (100MB+)</li>
-                        <li><span class="check">✓</span> Faster polling (500ms)</li>
-                        <li><span class="check">✓</span> Auto-start with Windows</li>
-                        <li><span class="check">✓</span> Lifetime updates</li>
-                        <li><span class="check">✓</span> Priority support</li>
+                        <li><span class="check">✓</span> Aggressive Equilibrium</li>
+                        <li><span class="check">✓</span> E-Core & QoS Isolation</li>
+                        <li><span class="check">✓</span> Network Throttling (WIP)</li>
+                        <li><span class="check">✓</span> Lifetime Updates</li>
                     </ul>
-                    <a href="https://gumroad.com" class="btn btn-primary"
-                        style="width: 100%; justify-content: center;">Get Premium</a>
+                    <a href="https://github.com/21e8-miner/chrome-tamer/releases" class="btn btn-primary"
+                        style="width: 100%; justify-content: center;">Get Version 2.3</a>
                 </div>
             </div>
         </div>
@@ -717,48 +721,28 @@
     <!-- FAQ -->
     <section class="faq" id="faq">
         <div class="container">
-            <h2>Frequently Asked Questions</h2>
+            <h2>Technical FAQ</h2>
             <div class="faq-list">
                 <div class="faq-item active">
                     <div class="faq-question">
-                        Is this safe to use?
+                        Is this just a tab suspender?
                         <span>▼</span>
                     </div>
                     <div class="faq-answer">
-                        Yes! Chrome Tamer uses official Windows APIs to manage memory. It doesn't modify Chrome or any
-                        system files. The worst that can happen is a background tab needs to reload when you switch to
-                        it.
+                        No. Unlike basic suspenders that use fixed timers, Chrome Tamer identifies "dominated
+                        strategies" in your resource pool. It considers system pressure, domain redundancy, and recency
+                        to act with precision.
                     </div>
                 </div>
                 <div class="faq-item">
                     <div class="faq-question">
-                        Will my tabs lose their content?
+                        How does the Native Kernel help?
                         <span>▼</span>
                     </div>
                     <div class="faq-answer">
-                        No. We only trim unused memory from background tabs. Your tab state, forms, and scroll position
-                        are preserved. Switching to a tamed tab may cause a brief reload, but nothing is lost.
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        Does it work with other browsers?
-                        <span>▼</span>
-                    </div>
-                    <div class="faq-answer">
-                        Currently Chrome Tamer is optimized for Google Chrome. Edge, Brave, and other Chromium browsers
-                        may work but aren't officially supported yet. Firefox support is planned.
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        What's the difference between Free and Premium?
-                        <span>▼</span>
-                    </div>
-                    <div class="faq-answer">
-                        Free mode tames tabs using 200MB+ of RAM. Premium drops this to 100MB and polls twice as fast
-                        (500ms vs 1s), meaning more aggressive memory savings. Premium also includes auto-start and
-                        lifetime updates.
+                        Chrome extensions are limited to high-level browser APIs. Our Native Kernel uses `taskpolicy`
+                        (macOS) and `EmptyWorkingSet` (Windows) to reclaim memory at the OS level that Chrome refuses to
+                        release.
                     </div>
                 </div>
             </div>
@@ -768,7 +752,7 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <p>© 2024 Chrome Tamer. Built with Advanced System Optimization.</p>
+            <p>© 2025 Chrome Tamer Enforcement. Built for the 21e8-miner ecosystem.</p>
         </div>
     </footer>
 

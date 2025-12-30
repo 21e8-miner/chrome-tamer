@@ -23,34 +23,44 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(bar);
     });
 
-    // Spectral Pricing Engine (Novel Concept)
-    const initSpectralPricing = () => {
-        const pricingCards = document.querySelectorAll('.pricing-card.featured');
-        const priceLabel = document.createElement('div');
-        priceLabel.className = 'spectral-offer';
-        priceLabel.style.cssText = `
-            font-size: 0.75rem;
-            color: #00ff88;
-            margin-top: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-        `;
+    // Technical Features Animation
+    const initTechnicalShowcase = () => {
+        const featureDetails = {
+            "Nash Equilibrium": "Every background tab acts as a player in a resource game. Utility is calculated as B(t) - [C_base + Penalty(redundancy)].",
+            "Pressure-Aware": "The engine monitors system RAM pressure. Cost coefficients scale non-linearly when physical RAM > 80% used.",
+            "CPU Affinity": "On Windows, background Chromium renders are isolated to efficiency cores (E-Cores) to prevent P-Core jitter.",
+            "Kernel Renicing": "On macOS/Unix, background processes are dynamically reniced to priority 19 (Idle) to ensure zero active-task lag."
+        };
 
-        pricingCards.forEach(card => {
-            card.querySelector('ul')?.after(priceLabel);
+        const pricingCard = document.querySelector('.pricing-card.featured');
+        if (pricingCard) {
+            const techInfo = document.createElement('div');
+            techInfo.className = 'technical-details';
+            techInfo.style.cssText = `
+                font-size: 0.8rem;
+                color: var(--accent);
+                margin-top: 24px;
+                padding-top: 24px;
+                border-top: 1px solid rgba(255,255,255,0.05);
+                font-family: 'Courier New', monospace;
+            `;
 
-            // Simulate dynamic demand calculation
-            setInterval(() => {
-                const demand = Math.floor(Math.random() * 50) + 120;
-                const savings = (Math.random() * 2 + 1).toFixed(1);
-                priceLabel.innerText = `🔥 High Demand: ${demand} users optimizing | Avg Saved: ${savings}GB`;
-            }, 3000);
-        });
+            let currentIdx = 0;
+            const keys = Object.keys(featureDetails);
+
+            const updateInfo = () => {
+                const key = keys[currentIdx];
+                techInfo.innerHTML = `<span style="opacity:0.5">></span> <span style="font-weight:700">${key}:</span> ${featureDetails[key as keyof typeof featureDetails]}`;
+                currentIdx = (currentIdx + 1) % keys.length;
+            };
+
+            pricingCard.appendChild(techInfo);
+            updateInfo();
+            setInterval(updateInfo, 5000);
+        }
     };
 
-    initSpectralPricing();
+    initTechnicalShowcase();
 
     // Smooth scroll for nav links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

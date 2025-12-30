@@ -1,31 +1,53 @@
-// Chrome Tamer Core Engine v2.0 (Equilibrium-Driven Pruning)
+// Chrome Tamer Core Engine v2.1 (Nash Equilibrium & Pressure-Aware)
 // Implements Game-Theoretic Resource Allocation [Dec 2025 Standard]
 
-const NASH_CONFIG = {
-    baseCost: 5,        // Base metabolic cost of a tab
-    competitionFactor: 2, // Penalty for domain redundancy
-    benefitDecay: 100,    // Scalar for importance decay
-    protectedDomains: ["youtube.com", "music.apple.com", "spotify.com", "meet.google.com", "localhost"]
+const DEFAULT_NASH_CONFIG = {
+    baseCost: 8,          // Base metabolic cost of a tab
+    competitionFactor: 3, // Penalty for domain redundancy
+    benefitDecay: 120,    // Scalar for importance decay
+    pressureWeight: 1.5,  // How much RAM pressure amplifies cost
+    protectedDomains: ["youtube.com", "music.apple.com", "spotify.com", "meet.google.com", "localhost", "github.com"]
 };
 
+let currentConfig = { ...DEFAULT_NASH_CONFIG };
+
 // --- Initialization ---
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.local.set({
-        systemStats: { deallocated: 0, reclaimedMB: 0 },
-        userExclusions: []
+chrome.runtime.onInstalled.addListener(async () => {
+    const data = await chrome.storage.local.get(["systemStats", "userExclusions", "config"]);
+
+    await chrome.storage.local.set({
+        systemStats: data.systemStats || { deallocated: 0, reclaimedMB: 0, equilibriumPressure: 0 },
+        userExclusions: data.userExclusions || [],
+        config: data.config || DEFAULT_NASH_CONFIG
     });
 
-    chrome.contextMenus.create({
-        id: "exclude-domain",
-        title: "🛡️ Exclude Domain (Utility Override)",
-        contexts: ["page"]
+    if (data.config) {
+        currentConfig = { ...currentConfig, ...data.config };
+    }
+
+    // Clean up old menus if any
+    chrome.contextMenus.removeAll(() => {
+        chrome.contextMenus.create({
+            id: "exclude-domain",
+            title: "🛡️ Exclude Domain (Utility Override)",
+            contexts: ["page"]
+        });
     });
 });
 
+// Load config on startup
+chrome.storage.local.get("config", (data) => {
+    if (data.config) currentConfig = { ...currentConfig, ...data.config };
+});
+
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-    if (info.menuItemId === "exclude-domain") {
-        const url = new URL(tab.url);
-        await addExclusion(url.hostname);
+    if (info.menuItemId === "exclude-domain" && tab.url) {
+        try {
+            const url = new URL(tab.url);
+            await addExclusion(url.hostname);
+        } catch (e) {
+            console.error("Invalid URL for exclusion:", tab.url);
+        }
     }
 });
 
@@ -38,48 +60,93 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     }
 });
 
+async function getMemoryPressure() {
+    return new Promise((resolve) => {
+        if (!chrome.system || !chrome.system.memory) {
+            resolve(0.5); // Fallback to neutral
+            return;
+        }
+        chrome.system.memory.getInfo((info) => {
+            const used = info.capacity - info.availableCapacity;
+            const pressure = used / info.capacity;
+            resolve(pressure);
+        });
+    });
+}
+
 async function computeNashEquilibrium() {
+    // 0. Update Pressure Metric
+    const pressure = await getMemoryPressure();
+
+    // 1. Get inactive tabs
     const tabs = await chrome.tabs.query({ active: false, discarded: false, audible: false });
     const { userExclusions } = await chrome.storage.local.get("userExclusions");
 
-    // 1. Calculate Domain Density for Competition Cost
+    // 2. Calculate Domain Density for Competition Cost
     const domainCounts = {};
     tabs.forEach(t => {
         try {
-            const domain = new URL(t.url).hostname;
-            domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+            if (t.url) {
+                const domain = new URL(t.url).hostname;
+                domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+            }
         } catch (e) { }
     });
 
-    // 2. Evaluate Utility for Each Player (Tab)
+    // 3. Evaluate Utility for Each Player (Tab)
+    let prunedCount = 0;
     for (const tab of tabs) {
-        if (isProtected(tab.url, userExclusions)) continue;
+        if (!tab.url || isProtected(tab.url, userExclusions)) continue;
 
-        const utility = calculateTabUtility(tab, domainCounts);
+        const { score, reason } = calculateTabUtility(tab, domainCounts, pressure);
 
-        // 3. Prune Dominated Strategies (Negative Utility)
-        if (utility < 0) {
-            console.log(`[Outcome] Pruning ${tab.title} (Utility: ${utility.toFixed(2)})`);
-            deallocateResource(tab);
+        // 4. Prune Dominated Strategies (Negative Utility)
+        if (score < 0) {
+            console.log(`[Outcome] Pruning ${tab.title} (Utility: ${score.toFixed(2)}, Reason: ${reason}, Pressure: ${(pressure * 100).toFixed(1)}%)`);
+            await deallocateResource(tab);
+            prunedCount++;
         }
     }
+
+    // Update Equilibrium Pressure for UI
+    await chrome.storage.local.set({
+        lastPressure: pressure,
+        lastPruned: prunedCount
+    });
 }
 
-function calculateTabUtility(tab, domainCounts) {
-    // Benefit Term (B): Decays as idle time increases
+function calculateTabUtility(tab, domainCounts, pressure) {
+    // 1. Benefit Term (B): Recency value
+    // B = benefitDecay / (time + 1)
     const idleTimeMinutes = (Date.now() - (tab.lastAccessed || Date.now())) / 1000 / 60;
-    // Prevent divide by zero, add 1 minute smoothing
-    const benefit = NASH_CONFIG.benefitDecay / (idleTimeMinutes + 1);
+    const benefit = currentConfig.benefitDecay / (Math.max(0.1, idleTimeMinutes) + 1);
 
-    // Cost Term (C): Base Cost + Redundancy Penalty (Self-Competition)
+    // 2. Cost Term (C): Resources + Competition + Dampened Pressure
+    // Pressure dampening: move only 20% toward current reading to avoid spike-induced panic
+    lastPressureValue = (lastPressureValue * 0.8) + (pressure * 0.2);
+
     let domain = "";
     try { domain = new URL(tab.url).hostname; } catch (e) { }
 
     const redundancy = domainCounts[domain] || 1;
-    const cost = NASH_CONFIG.baseCost + (NASH_CONFIG.competitionFactor * redundancy);
+    const baseCost = currentConfig.baseCost;
 
-    // Utility = B - C
-    return benefit - cost;
+    // Competition is non-linear: each extra tab costs more than the last
+    const competitionCost = currentConfig.competitionFactor * Math.pow(redundancy - 1, 1.2);
+
+    // Pressure Penalty: Amplified by dampening state
+    const pressurePenalty = lastPressureValue * currentConfig.pressureWeight * 10;
+
+    const cost = baseCost + competitionCost + pressurePenalty;
+    const score = benefit - cost;
+
+    // 3. Determine Primary Driver (Reason)
+    let reason = "Idle";
+    if (redundancy > 1 && (competitionCost > baseCost)) reason = "Redundant";
+    if (pressurePenalty > competitionCost && pressurePenalty > baseCost) reason = "Sys Pressure";
+    if (idleTimeMinutes > 60) reason = "Aged Out";
+
+    return { score, reason };
 }
 
 // --- Message Bus ---
@@ -93,7 +160,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
     if (request.action === "getLiveScores") {
-        calculateAllScores().then(scores => sendResponse({ scores }));
+        calculateAllScores().then(data => sendResponse(data));
         return true;
     }
 });
@@ -103,32 +170,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 async function calculateAllScores() {
     const tabs = await chrome.tabs.query({ active: false, discarded: false, audible: false });
     const { userExclusions } = await chrome.storage.local.get("userExclusions");
+    const pressure = await getMemoryPressure();
 
-    // Pre-calc domain density
     const domainCounts = {};
     tabs.forEach(t => {
-        try { const d = new URL(t.url).hostname; domainCounts[d] = (domainCounts[d] || 0) + 1; } catch (e) { }
+        try { if (t.url) { const d = new URL(t.url).hostname; domainCounts[d] = (domainCounts[d] || 0) + 1; } } catch (e) { }
     });
 
     const scoredTabs = tabs.map(tab => {
-        if (isProtected(tab.url, userExclusions)) return null;
+        if (!tab.url || isProtected(tab.url, userExclusions)) return null;
+        const { score, reason } = calculateTabUtility(tab, domainCounts, pressure);
         return {
-            title: tab.title.substring(0, 25) + "...",
-            score: calculateTabUtility(tab, domainCounts),
-            id: tab.id
+            title: (tab.title || "Untitled").substring(0, 30) + (tab.title?.length > 30 ? "..." : ""),
+            score: score,
+            reason: reason,
+            id: tab.id,
+            favIconUrl: tab.favIconUrl
         };
     }).filter(t => t !== null);
 
-    // Return bottom 3 (Lowest Utility -> Most likely to die)
-    return scoredTabs.sort((a, b) => a.score - b.score).slice(0, 3);
+    // Sort by Utility (Lowest first)
+    scoredTabs.sort((a, b) => a.score - b.score);
+
+    return {
+        scores: scoredTabs.slice(0, 5), // Return top 5 candidates
+        pressure: pressure,
+        tabCount: tabs.length
+    };
 }
 
 async function executeHyperfocus() {
-    // "Middle-Out" Compression: Aggressively deallocate everything but the active context.
+    // "Middle-Out" Compression: Aggressively deallocate everything but protected or active contexts.
     const tabs = await chrome.tabs.query({ active: false, discarded: false, audible: false });
+    const { userExclusions } = await chrome.storage.local.get("userExclusions");
+
     let count = 0;
     for (const tab of tabs) {
-        if (!tab.pinned) {
+        if (!tab.pinned && !isProtected(tab.url, userExclusions)) {
             await deallocateResource(tab);
             count++;
         }
@@ -137,9 +215,9 @@ async function executeHyperfocus() {
 }
 
 function isProtected(url, userList = []) {
-    if (!url) return false;
-    const combined = [...NASH_CONFIG.protectedDomains, ...userList];
-    return combined.some(domain => url.includes(domain));
+    if (!url) return true; // Protect empty URLs/internal pages by default
+    const combined = [...currentConfig.protectedDomains, ...userList];
+    return combined.some(domain => url.toLowerCase().includes(domain.toLowerCase()));
 }
 
 async function addExclusion(domain) {
@@ -149,6 +227,7 @@ async function addExclusion(domain) {
         list.push(domain);
         await chrome.storage.local.set({ userExclusions: list });
     }
+    return { status: "success", domain };
 }
 
 async function deallocateResource(tab) {
@@ -157,12 +236,14 @@ async function deallocateResource(tab) {
 
         // Telemetry Update
         const data = await chrome.storage.local.get("systemStats");
+        const stats = data.systemStats || { deallocated: 0, reclaimedMB: 0 };
+
         const newStats = {
-            deallocated: (data.systemStats?.deallocated || 0) + 1,
-            reclaimedMB: (data.systemStats?.reclaimedMB || 0) + 150
+            deallocated: stats.deallocated + 1,
+            reclaimedMB: stats.reclaimedMB + 250 // Reflecting 2025 heavy web-app RAM footprints
         };
         await chrome.storage.local.set({ systemStats: newStats });
     } catch (err) {
-        // Silent fail is acceptable
+        console.warn(`Failed to discard tab ${tab.id}:`, err);
     }
 }

@@ -7,7 +7,9 @@
         "tabs",
         "storage",
         "alarms",
-        "idle"
+        "idle",
+        "system.memory",
+        "contextMenus"
     ],
     "host_permissions": [],
     "background": {

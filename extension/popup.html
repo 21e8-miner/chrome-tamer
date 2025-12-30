@@ -2,22 +2,33 @@
 <html>
 
 <head>
+  <meta charset="UTF-8">
   <style>
+    :root {
+      --bg: #050508;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #00d9ff;
+      --accent-glow: rgba(0, 217, 255, 0.3);
+      --text: #ffffff;
+      --text-dim: #888899;
+    }
+
     body {
-      width: 320px;
-      background: #0a0a0f;
-      color: white;
-      font-family: 'Inter', system-ui, sans-serif;
-      padding: 20px;
+      width: 340px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+      padding: 18px;
       margin: 0;
-      border: 1px solid #333;
+      overflow-x: hidden;
     }
 
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .brand {
@@ -27,66 +38,109 @@
     }
 
     .logo {
-      width: 28px;
-      height: 28px;
-      background: linear-gradient(135deg, #00d9ff, #0080ff);
-      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), #0077ff);
+      border-radius: 8px;
       display: grid;
       place-items: center;
-      font-weight: 800;
+      font-weight: 900;
       color: #000;
-      font-size: 14px;
+      font-size: 16px;
+      box-shadow: 0 0 15px var(--accent-glow);
     }
 
     h1 {
       margin: 0;
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
 
-    .stats-container {
+    .pressure-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pressure-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .gauge-bg {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+      width: 100%;
+      position: relative;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00d9ff, #ff00ff);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .stat-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
       text-align: center;
+      transition: border-color 0.3s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--accent);
     }
 
     .stat-val {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
-      color: #00d9ff;
-      margin-bottom: 4px;
+      color: var(--accent);
+      margin-bottom: 2px;
     }
 
     .stat-label {
       font-size: 10px;
-      color: #888;
+      color: var(--text-dim);
       text-transform: uppercase;
       font-weight: 600;
-      letter-spacing: 0.5px;
     }
 
     .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
     }
 
     .btn {
       width: 100%;
       border: none;
-      padding: 14px;
-      border-radius: 10px;
-      font-weight: 600;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
       font-size: 13px;
       cursor: pointer;
       display: flex;
@@ -97,37 +151,86 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #00d9ff, #0080ff);
+      background: var(--accent);
       color: #000;
-      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.2);
     }
 
     .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.3);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
+      transform: scale(1.02);
+      box-shadow: 0 0 20px var(--accent-glow);
     }
 
     .btn-secondary {
       background: rgba(255, 255, 255, 0.05);
-      color: #a0a0b0;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border: 1px solid var(--border);
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: white;
+      background: rgba(255, 255, 255, 0.1);
     }
 
-    .status-bar {
-      margin-top: 20px;
+    .debug-panel {
+      margin-top: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .debug-title {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+
+    .tab-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
       font-size: 11px;
-      color: #666;
+    }
+
+    .tab-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .tab-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    .tab-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+      color: #ccc;
+    }
+
+    .tab-score {
+      font-family: monospace;
+      font-weight: 700;
+      color: #ff4444;
+      background: rgba(255, 68, 68, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .footer {
+      margin-top: 16px;
+      font-size: 10px;
+      color: #444455;
       text-align: center;
       display: flex;
+      align-items: center;
       justify-content: center;
       gap: 6px;
     }
@@ -137,43 +240,19 @@
       height: 6px;
       background: #00ff88;
       border-radius: 50%;
-      box-shadow: 0 0 8px #00ff88;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
       animation: pulse 2s infinite;
     }
 
-    .debug-terminal {
-      background: #000;
-      border: 1px solid #222;
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 15px;
-      font-family: 'Courier New', monospace;
-      font-size: 10px;
-      color: #00d9ff;
-    }
-
-    .debug-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-
-    .debug-score {
-      color: #ff4444;
-      font-weight: bold;
-    }
-
     @keyframes pulse {
-      0% {
-        opacity: 0.5;
+
+      0%,
+      100% {
+        opacity: 0.4;
       }
 
       50% {
         opacity: 1;
-      }
-
-      100% {
-        opacity: 0.5;
       }
     }
   </style>
@@ -182,16 +261,28 @@
 <body>
   <div class="header">
     <div class="brand">
-      <div class="logo">C</div>
+      <div class="logo">T</div>
       <h1>Chrome Tamer</h1>
     </div>
-    <div style="font-size: 10px; color: #444; border: 1px solid #333; padding: 2px 6px; border-radius: 4px;">PRO</div>
+    <div
+      style="font-size: 9px; color: var(--accent); border: 1px solid var(--accent); padding: 1px 5px; border-radius: 4px; font-weight: 800;">
+      AUTO</div>
   </div>
 
-  <div class="stats-container">
+  <div class="pressure-container">
+    <div class="pressure-label">
+      <span>System Pressure</span>
+      <span id="pressureVal">0%</span>
+    </div>
+    <div class="gauge-bg">
+      <div class="gauge-fill" id="pressureGauge"></div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-val" id="savedMem">0<span style="font-size: 14px">MB</span></div>
-      <div class="stat-label">RAM Saved</div>
+      <div class="stat-val" id="savedMem">0<span style="font-size: 12px">MB</span></div>
+      <div class="stat-label">RAM Freed</div>
     </div>
     <div class="stat-card">
       <div class="stat-val" id="tamedTabs">0</div>
@@ -201,21 +292,23 @@
 
   <div class="actions">
     <button class="btn btn-primary" id="focusModeBtn">
-      <span>⚡ Focus Mode (Panic Button)</span>
+      <span>⚡ Activate Focus Engine</span>
     </button>
     <button class="btn btn-secondary" id="whitelistBtn">
-      <span>🛡️ Exclude Current Site</span>
+      <span>🛡️ Exclude Current Domain</span>
     </button>
   </div>
 
-  <div class="debug-terminal" id="nashDebug">
-    <div style="color: #666; margin-bottom: 8px;">NASH EQUILIBRIUM (At Risk):</div>
-    <div id="debugList">Loading players...</div>
+  <div class="debug-panel">
+    <div class="debug-title">Low Utility Candidates</div>
+    <div id="debugList">
+      <div style="font-size: 11px; color: #555;">Analyzing players...</div>
+    </div>
   </div>
 
-  <div class="status-bar">
+  <div class="footer">
     <div class="pulse"></div>
-    <span>Engine Active • v2.1 (Nash)</span>
+    <span>Engine Status: Nash Equilibrium v2.1</span>
   </div>
 
   <script src="popup.js"></script>

@@ -1,47 +1,48 @@
-# Chrome Tamer: Equilibrium-Driven Resource Allocation [v2.1]
+# Chrome Tamer: Equilibrium-Driven Resource Allocation [v2.2]
 
-> *"Sparsity is not an imposed constraint, but an emergent property of competition."*
+> *"Resource sparsity is corrected not by deletion, but by intelligent reallocation."*
 
-**Chrome Tamer** is a high-performance browser extension that replaces traditional "timeout-based" tab suspenders with a **Game-Theoretic Resource Allocator**.
+**Chrome Tamer** is a high-performance system-wide browser optimizer. It combines a **Game-Theoretic Extension Engine** with a **Native Desktop Kernel** to maintain peak system performance, regardless of how many tabs you have open.
 
-Instead of arbitrarily killing tabs after 10 minutes, Chrome Tamer treats every background process as a player in a non-cooperative game. Tabs must "bid" for system resources based on their **Utility Score**. When competition for RAM exceeds the system's supply, dominated strategies (tabs with low utility) are pruned via the native `chrome.tabs.discard` API.
+![Version](https://img.shields.io/badge/version-2.2_Equilibrium-00d9ff)
+![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-white)
+![Build](https://img.shields.io/badge/build-Hardened-green)
 
-![Version](https://img.shields.io/badge/build-v2.1_Nash-00d9ff)
-![License](https://img.shields.io/badge/license-MIT-white)
+## 🧠 The Engine (Technical Capabilities)
 
-## 🧠 The Math (How it Works)
+### 1. Game-Theoretic Extension (`extension/`)
+The browser extension runs a `computeNashEquilibrium()` cycle every minute. The utility function $U(t)$ is now **system-pressure aware**:
 
-The engine runs a `computeNashEquilibrium()` cycle every minute. The utility function $U(t)$ for a given tab $t$ is calculated as:
-
-$$U(t) = \frac{\alpha}{T_{idle} + 1} - (C_{base} + \beta \cdot N_{redundancy})$$
+$$U(t) = \frac{\text{benefitDecay}}{T_{idle} + 1} - (\text{baseCost} + \beta \cdot N_{\text{redundancy}} + \gamma \cdot P_{\text{system}})$$
 
 Where:
-*   $T_{idle}$: Time since last interaction (Recency Benefit).
-*   $C_{base}$: Base metabolic cost of a Chrome renderer capability (approx. 150MB).
-*   $N_{redundancy}$: The number of other tabs open from the same domain (Penalty for clutter).
+*   $P_{\text{system}}$: Real-time **Memory Pressure** (0.0 to 1.0).
+*   $\gamma$ (Pressure Weight): Amplifies the cost of tabs when your physical RAM is nearly full.
+*   **Outcome**: In high-pressure situations, the extension becomes more aggressive; in low-pressure situations, it stays lenient.
 
-If $U(t) < 0$, the tab is considered a **Dominated Strategy** and is immediately deallocated.
+### 2. Native Desktop Kernel (`src/`)
+A cross-platform (Windows/macOS) Python application that provides system-level management:
+*   **CPU Affinity (Windows)**: Isolates background browser renders to "Efficiency Cores".
+*   **Process Priority**: Sets background tabs to `IDLE` priority, preventing them from stealing CPU cycles from your active work.
+*   **Memory Squashing (Windows)**: Uses `EmptyWorkingSet` to force background processes to release unneeded physical RAM.
+*   **Active Focus Detection**: Dynamic detection of focus events to instantly restore full performance to the tab you just switched to.
 
-## ✨ Features
+## ✨ New in v2.2
+*   **Cross-Platform Support**: Full support for macOS and Windows.
+*   **Memory Pressure Awareness**: Extension now scales its aggressiveness based on actual physical RAM usage.
+*   **Enhanced UI**: Modernized popup with a real-time system pressure gauge and utility scoring leaderboard.
+*   **Proactive Protection**: Built-in whitelist for critical domains (Github, YouTube, Google Meet, etc.).
 
-*   **Logic-Based Pruning**: Kills clutter (50 duplicate documentation tabs) faster than unique, important pages.
-*   **Hyperfocus Mode ("The Panic Button")**: A single click forces a "Middle-Out" compression event, deallocating *every* background resource to free up maximum CPU/RAM for your active task (Gaming/Calls).
-*   **Zero-Injection**: Uses pure native browser APIs. No content scripts injected into your pages. Secure and lightweight.
-*   **Visual Debugger**: Real-time view of the Utility Scores for active tabs.
+## 📦 Setup
 
-## 📦 Installation (Developer Mode)
+### Browser Extension
+1.  Navigate to `chrome://extensions/`.
+2.  Enable **Developer mode**.
+3.  Click **Load unpacked** and select the `extension/` folder.
 
-1.  Clone this repository.
-2.  Open Chrome and navigate to `chrome://extensions/`.
-3.  Toggle **Developer mode** (top right).
-4.  Click **Load unpacked**.
-5.  Select the `extension/` directory from this repo.
-
-## 🏗️ Architecture
-
-*   **Kernel**: `background.js` (Event-driven service worker).
-*   **Input**: `popup.html` (Spectral UI System).
-*   **Logic**: `Utility Calculation` (Game Theory Model).
+### Native Component (Optional but Recommended)
+1.  Run `pip install -r requirements.txt`.
+2.  Run `python src/tray_app.py` or use the provided build scripts.
 
 ---
-*Built for the 21e8 mining rig ecosystem context.*
+*Developed for the 21e8-miner ecosystem to ensure smooth mining and browsing concurrent operations.*
