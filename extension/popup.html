@@ -141,6 +141,28 @@
       animation: pulse 2s infinite;
     }
 
+    .debug-terminal {
+      background: #000;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #00d9ff;
+    }
+
+    .debug-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .debug-score {
+      color: #ff4444;
+      font-weight: bold;
+    }
+
     @keyframes pulse {
       0% {
         opacity: 0.5;
@@ -182,13 +204,18 @@
       <span>⚡ Focus Mode (Panic Button)</span>
     </button>
     <button class="btn btn-secondary" id="whitelistBtn">
-      <span>🛡️ Whitelist Current Site</span>
+      <span>🛡️ Exclude Current Site</span>
     </button>
+  </div>
+
+  <div class="debug-terminal" id="nashDebug">
+    <div style="color: #666; margin-bottom: 8px;">NASH EQUILIBRIUM (At Risk):</div>
+    <div id="debugList">Loading players...</div>
   </div>
 
   <div class="status-bar">
     <div class="pulse"></div>
-    <span>Engine Active • v1.1</span>
+    <span>Engine Active • v2.1 (Nash)</span>
   </div>
 
   <script src="popup.js"></script>

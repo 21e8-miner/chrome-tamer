@@ -1,4 +1,7 @@
-document.addEventListener('DOMContentLoaded', updateStats);
+document.addEventListener('DOMContentLoaded', () => {
+    updateStats();
+    pollLiveScores();
+});
 
 // Focus Mode: The "Kill Switch"
 document.getElementById('focusModeBtn').addEventListener('click', async () => {
@@ -48,4 +51,21 @@ async function updateStats() {
     }
 
     document.getElementById('tamedTabs').innerText = stats.deallocated;
+}
+
+function pollLiveScores() {
+    chrome.runtime.sendMessage({ action: "getLiveScores" }, (response) => {
+        const list = document.getElementById('debugList');
+        if (!response.scores || response.scores.length === 0) {
+            list.innerHTML = "No candidates for pruning.";
+            return;
+        }
+
+        list.innerHTML = response.scores.map(s => `
+            <div class="debug-row">
+                <span>${s.title}</span>
+                <span class="debug-score">${s.score.toFixed(2)}</span>
+            </div>
+        `).join('');
+    });
 }

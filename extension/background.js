@@ -92,9 +92,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         addExclusion(request.domain).then(status => sendResponse(status));
         return true;
     }
+    if (request.action === "getLiveScores") {
+        calculateAllScores().then(scores => sendResponse({ scores }));
+        return true;
+    }
 });
 
 // --- Core Algorithms ---
+
+async function calculateAllScores() {
+    const tabs = await chrome.tabs.query({ active: false, discarded: false, audible: false });
+    const { userExclusions } = await chrome.storage.local.get("userExclusions");
+
+    // Pre-calc domain density
+    const domainCounts = {};
+    tabs.forEach(t => {
+        try { const d = new URL(t.url).hostname; domainCounts[d] = (domainCounts[d] || 0) + 1; } catch (e) { }
+    });
+
+    const scoredTabs = tabs.map(tab => {
+        if (isProtected(tab.url, userExclusions)) return null;
+        return {
+            title: tab.title.substring(0, 25) + "...",
+            score: calculateTabUtility(tab, domainCounts),
+            id: tab.id
+        };
+    }).filter(t => t !== null);
+
+    // Return bottom 3 (Lowest Utility -> Most likely to die)
+    return scoredTabs.sort((a, b) => a.score - b.score).slice(0, 3);
+}
 
 async function executeHyperfocus() {
     // "Middle-Out" Compression: Aggressively deallocate everything but the active context.
