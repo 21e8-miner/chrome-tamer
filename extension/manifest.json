@@ -11,7 +11,8 @@
         "system.memory",
         "contextMenus",
         "tabGroups",
-        "notifications"
+        "notifications",
+        "debugger"
     ],
     "host_permissions": [],
     "background": {
