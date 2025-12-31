@@ -15,10 +15,10 @@
 
 ## What It Does
 
-Chrome Tamer is a **memory-pressure-aware eviction engine** that automatically reclaims RAM when your system is under stress. Instead of relying on fixed timers or manual tab management, it:
+Chrome Tamer is a **memory-pressure-aware tab manager** that automatically discards tabs when system RAM is low. Instead of relying on fixed timers or manual tab management, it:
 
 1. **Monitors system RAM** via `chrome.system.memory.getInfo()` every minute
-2. **Only acts when pressure exceeds 75%** (configurable threshold)
+2. **Only acts when RAM usage exceeds 75%** (configurable threshold)
 3. **Scores background tabs** using: recency, domain redundancy, and system pressure
 4. **Discards low-utility tabs** using `chrome.tabs.discard` (tabs stay visible, reload on revisit)
 

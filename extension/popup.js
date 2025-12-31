@@ -54,15 +54,11 @@ document.getElementById('whitelistBtn').addEventListener('click', async () => {
 
 async function updateStats() {
     const data = await chrome.storage.local.get("systemStats");
-    const stats = data.systemStats || { deallocated: 0, reclaimedMB: 0 };
+    const stats = data.systemStats || { deallocated: 0 };
 
-    const savedElem = document.getElementById('savedMem');
-    if (stats.reclaimedMB >= 1024) {
-        savedElem.innerHTML = (stats.reclaimedMB / 1024).toFixed(1) + '<span style="font-size: 12px">GB</span>';
-    } else {
-        savedElem.innerHTML = stats.reclaimedMB + '<span style="font-size: 12px">MB</span>';
-    }
-
+    // HONEST: We can only count tabs discarded, not RAM freed
+    // Chrome extensions cannot measure actual memory usage
+    document.getElementById('savedMem').innerHTML = stats.deallocated + '<span style="font-size: 12px">tabs</span>';
     document.getElementById('tamedTabs').innerText = stats.deallocated;
 }
 

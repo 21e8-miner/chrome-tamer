@@ -16,7 +16,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     const data = await chrome.storage.local.get(["systemStats", "userExclusions", "config"]);
 
     await chrome.storage.local.set({
-        systemStats: data.systemStats || { deallocated: 0, reclaimedMB: 0, equilibriumPressure: 0 },
+        systemStats: data.systemStats || { deallocated: 0 },
         userExclusions: data.userExclusions || [],
         config: data.config || DEFAULT_CONFIG
     });
@@ -247,13 +247,12 @@ async function deallocateResource(tab) {
     try {
         await chrome.tabs.discard(tab.id);
 
-        // Telemetry Update
+        // Telemetry Update (honest: we can only count discarded tabs, not actual RAM)
         const data = await chrome.storage.local.get("systemStats");
-        const stats = data.systemStats || { deallocated: 0, reclaimedMB: 0 };
+        const stats = data.systemStats || { deallocated: 0 };
 
         const newStats = {
-            deallocated: stats.deallocated + 1,
-            reclaimedMB: stats.reclaimedMB + 250 // Reflecting 2025 heavy web-app RAM footprints
+            deallocated: stats.deallocated + 1
         };
         await chrome.storage.local.set({ systemStats: newStats });
     } catch (err) {
