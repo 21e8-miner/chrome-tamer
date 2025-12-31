@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Chrome Tamer",
-    "version": "1.0.0",
-    "description": "Automatically tames background tabs to reclaim GBs of RAM. Mac & Windows compatible.",
+    "version": "2.0.0",
+    "description": "Pressure-aware tab manager. Automatically discards idle tabs when RAM runs low.",
     "permissions": [
         "tabs",
         "storage",
@@ -10,7 +10,7 @@
         "idle",
         "system.memory",
         "contextMenus",
-        "nativeMessaging"
+        "tabGroups"
     ],
     "host_permissions": [],
     "background": {

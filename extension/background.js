@@ -247,15 +247,42 @@ async function deallocateResource(tab) {
     try {
         await chrome.tabs.discard(tab.id);
 
-        // Telemetry Update (honest: we can only count discarded tabs, not actual RAM)
+        // Extract domain for analytics
+        let domain = '';
+        try {
+            domain = new URL(tab.url).hostname;
+        } catch (e) { }
+
+        // Simple counter (for free tier display)
         const data = await chrome.storage.local.get("systemStats");
         const stats = data.systemStats || { deallocated: 0 };
+        await chrome.storage.local.set({
+            systemStats: { deallocated: stats.deallocated + 1 }
+        });
 
-        const newStats = {
-            deallocated: stats.deallocated + 1
-        };
-        await chrome.storage.local.set({ systemStats: newStats });
+        // Detailed event log (for Pro analytics)
+        await logEvent(1, [domain]);
+
     } catch (err) {
         console.warn(`Failed to discard tab ${tab.id}:`, err);
     }
+}
+
+// Event logging for Pro analytics (stores real data only)
+async function logEvent(tabsDiscarded, domains) {
+    const { eventHistory, lastPressure } = await chrome.storage.local.get(['eventHistory', 'lastPressure']);
+    const history = eventHistory || [];
+
+    history.push({
+        timestamp: Date.now(),
+        tabsDiscarded,
+        domains: domains.filter(d => d), // Remove empty strings
+        pressure: lastPressure || 0
+    });
+
+    // Keep only last 30 days (avoid storage bloat)
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const filtered = history.filter(e => e.timestamp > thirtyDaysAgo);
+
+    await chrome.storage.local.set({ eventHistory: filtered });
 }
