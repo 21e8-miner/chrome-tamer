@@ -77,7 +77,7 @@ function pollLiveScores() {
         // Update Tab List
         const list = document.getElementById('debugList');
         if (!response.scores || response.scores.length === 0) {
-            list.innerHTML = '<div style="font-size: 11px; color: #555; text-align: center; padding: 10px;">Equilibrium Reached. No candidates.</div>';
+            list.innerHTML = '<div style="font-size: 11px; color: #555; text-align: center; padding: 10px;">All tabs healthy. Nothing to discard.</div>';
             return;
         }
 
