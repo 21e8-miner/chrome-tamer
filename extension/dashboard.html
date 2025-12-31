@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome Tamer - Performance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #050508;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #00d9ff;
+            --text: #ffffff;
+            --text-dim: #888899;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-bottom: 32px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(0, 217, 255, 0.1);
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📊 Performance Dashboard</h1>
+        <p class="subtitle">Historical analysis of Chrome Tamer's impact</p>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value" id="totalSaved">0 GB</div>
+                <div class="stat-label">Total RAM Freed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalTabs">0</div>
+                <div class="stat-label">Total Tabs Tamed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgPressure">0%</div>
+                <div class="stat-label">Avg Memory Pressure</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="uptime">0d</div>
+                <div class="stat-label">Active Days</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">RAM Freed Over Time (30 Days)</div>
+            <canvas id="ramChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Memory Pressure History</div>
+            <canvas id="pressureChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">🏆 Most Pruned Domains (Leaderboard)</div>
+            <table id="leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Domain</th>
+                        <th>Tabs Discarded</th>
+                        <th>Est. RAM Saved</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-dim);">Loading data...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn" id="exportBtn">📥 Export CSV</button>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+
+</html>
