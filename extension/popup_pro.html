@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=400">
+    <title>Chrome Tamer Pro</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --border: #1f1f2e;
+            --text: #e4e4ed;
+            --dim: #6b6b7b;
+            --accent: #00d4ff;
+            --green: #00ff88;
+            --red: #ff4466;
+            --orange: #ffaa00;
+        }
+
+        body {
+            width: 420px;
+            min-height: 500px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .pro-badge {
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            color: #000;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--dim);
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text);
+        }
+
+        /* Content */
+        .content {
+            padding: 16px;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Memory Panel */
+        .memory-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-value.green {
+            color: var(--green);
+        }
+
+        .stat-value.red {
+            color: var(--red);
+        }
+
+        .stat-value.accent {
+            color: var(--accent);
+        }
+
+        /* Tab List */
+        .section-title {
+            font-size: 11px;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 16px 0 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tab-list {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .tab-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            gap: 10px;
+        }
+
+        .tab-row:last-child {
+            border-bottom: none;
+        }
+
+        .tab-favicon {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            background: var(--border);
+        }
+
+        .tab-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tab-title {
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tab-url {
+            font-size: 10px;
+            color: var(--dim);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tab-memory {
+            font-size: 12px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+            min-width: 60px;
+        }
+
+        .tab-memory.high {
+            color: var(--red);
+        }
+
+        .tab-memory.med {
+            color: var(--orange);
+        }
+
+        .tab-memory.low {
+            color: var(--green);
+        }
+
+        /* Predict Panel */
+        .predict-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .predict-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .predict-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .predict-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 3px;
+        }
+
+        .entropy-display {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent);
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .entropy-label {
+            text-align: center;
+            color: var(--dim);
+            font-size: 11px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-danger {
+            background: rgba(255, 68, 102, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(255, 68, 102, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 68, 102, 0.25);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--dim);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: var(--dim);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">🦁</div>
+            Chrome Tamer
+        </div>
+        <span class="pro-badge" id="proBadge" style="display: none;">Pro</span>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-panel="memory">Memory</div>
+        <div class="tab" data-panel="predict">Predict</div>
+        <div class="tab" data-panel="clusters">Clusters</div>
+    </div>
+
+    <div class="content">
+        <!-- Memory Panel -->
+        <div class="panel active" id="memory">
+            <div class="memory-overview">
+                <div class="stat-card">
+                    <div class="stat-label">Total Heap</div>
+                    <div class="stat-value accent" id="totalHeap">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tabs Profiled</div>
+                    <div class="stat-value" id="tabCount">--</div>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <span>Top Memory Users</span>
+                <span id="refreshTime">--</span>
+            </div>
+
+            <div class="tab-list" id="memoryList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Profiling tabs...
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="refreshBtn">⟳ Refresh</button>
+                <button class="btn btn-danger" id="killTopBtn">Kill Top 3</button>
+            </div>
+        </div>
+
+        <!-- Predict Panel -->
+        <div class="panel" id="predict">
+            <div class="stat-card" style="margin-bottom: 16px;">
+                <div class="stat-label">Access Entropy</div>
+                <div class="entropy-display" id="entropyValue">--</div>
+                <div class="entropy-label">Higher = more diverse browsing</div>
+            </div>
+
+            <div class="section-title">Predicted Next Tabs</div>
+            <div id="predictions">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Learning patterns...
+                </div>
+            </div>
+        </div>
+
+        <!-- Clusters Panel -->
+        <div class="panel" id="clusters">
+            <div class="section-title">Tab Clusters</div>
+            <div id="clusterList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Analyzing graph...
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="groupBtn">Group by Cluster</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span><span class="status-dot"></span>Engine Active</span>
+        <span id="engineVersion">v2.1 Core</span>
+    </div>
+
+    <script src="popup_pro.js"></script>
+</body>
+
+</html>
