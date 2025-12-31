@@ -382,7 +382,7 @@ class DuplicateKiller {
 }
 
 // ============================================
-// Initialize all value-add features
+// Initialize all value-add features (exposed globally for background.js)
 // ============================================
 const tabSnooze = new TabSnooze();
 const tabSearch = new TabSearch();
@@ -390,101 +390,5 @@ const sessionManager = new SessionManager();
 const focusBlocker = new FocusBlocker();
 const duplicateKiller = new DuplicateKiller();
 
-// Auto-save session every 30 minutes
-chrome.alarms.create('autoSaveSession', { periodInMinutes: 30 });
-
-// Check snooze alarms every minute
-chrome.alarms.create('checkSnooze', { periodInMinutes: 1 });
-
-// Alarm handlers
-chrome.alarms.onAlarm.addListener(async (alarm) => {
-    if (alarm.name === 'autoSaveSession') {
-        await sessionManager.autoSave();
-    }
-    if (alarm.name === 'checkSnooze') {
-        await tabSnooze.checkSnoozeAlarms();
-    }
-    if (alarm.name === 'focusEnd') {
-        await focusBlocker.endFocus();
-        // Notify user
-        chrome.notifications.create({
-            type: 'basic',
-            iconUrl: 'icons/icon128.png',
-            title: 'Focus Mode Ended',
-            message: 'Great work! Your focus session has ended.'
-        });
-    }
-    if (alarm.name.startsWith('snooze-')) {
-        await tabSnooze.checkSnoozeAlarms();
-    }
-});
-
-// Block navigation in focus mode
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (changeInfo.url) {
-        await focusBlocker.checkAndBlock(tabId, changeInfo.url);
-    }
-});
-
-// Message handlers for value-add features
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    // Tab Snooze
-    if (request.action === 'snoozeTab') {
-        tabSnooze.snoozeTab(request.tabId, request.reopenAt).then(sendResponse);
-        return true;
-    }
-    if (request.action === 'getSnoozedTabs') {
-        tabSnooze.getSnoozedTabs().then(sendResponse);
-        return true;
-    }
-
-    // Tab Search
-    if (request.action === 'searchTabs') {
-        tabSearch.search(request.query).then(sendResponse);
-        return true;
-    }
-    if (request.action === 'focusTab') {
-        tabSearch.focusTab(request.tabId, request.windowId).then(sendResponse);
-        return true;
-    }
-
-    // Sessions
-    if (request.action === 'saveSession') {
-        sessionManager.saveSession(request.name).then(sendResponse);
-        return true;
-    }
-    if (request.action === 'restoreSession') {
-        sessionManager.restoreSession(request.index).then(sendResponse);
-        return true;
-    }
-    if (request.action === 'listSessions') {
-        sessionManager.listSessions().then(sendResponse);
-        return true;
-    }
-
-    // Focus Mode
-    if (request.action === 'startFocus') {
-        focusBlocker.startFocus(request.minutes, request.blockedDomains).then(sendResponse);
-        return true;
-    }
-    if (request.action === 'endFocus') {
-        focusBlocker.endFocus().then(sendResponse);
-        return true;
-    }
-    if (request.action === 'getFocusStatus') {
-        focusBlocker.getStatus().then(sendResponse);
-        return true;
-    }
-
-    // Duplicates
-    if (request.action === 'findDuplicates') {
-        duplicateKiller.findDuplicates().then(sendResponse);
-        return true;
-    }
-    if (request.action === 'killDuplicates') {
-        duplicateKiller.killDuplicates().then(sendResponse);
-        return true;
-    }
-});
-
-console.log('[Value-Add] All high-value features loaded');
+// NOTE: Alarm handlers, tab.onUpdated, and message handlers are in background.js (unified)
+console.log('[Value-Add] All high-value features loaded - classes available for background.js');

@@ -297,74 +297,14 @@ async function activatePro(key) {
 }
 
 // ============================================
-// Initialize & Message Handlers
+// Initialize (exposed globally for background.js)
 // ============================================
 const cloudSync = new CloudSyncManager();
 const scheduler = new SmartScheduler();
 const analytics = new AnalyticsEngine();
-const tabGroups = new TabGroupOrganizer();
 
-// Initialize on load
+// Initialize scheduler on load
 scheduler.init();
 
-// Alarm handler for scheduler
-chrome.alarms.onAlarm.addListener((alarm) => {
-    if (alarm.name === "smartScheduler") {
-        scheduler.checkSchedule();
-    }
-});
-
-// Message handler
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    // Pro-gated features
-    const proFeatures = ['syncToCloud', 'syncFromCloud', 'addSchedule', 'getSchedule', 'getAnalytics', 'autoOrganizeTabs'];
-
-    if (proFeatures.includes(request.action)) {
-        isProActive().then(isPro => {
-            if (!isPro) {
-                sendResponse({ success: false, error: 'Pro license required', requiresPro: true });
-                return;
-            }
-
-            // Route to feature
-            handleProFeature(request, sendResponse);
-        });
-        return true;
-    }
-
-    // License management (not gated)
-    if (request.action === 'activatePro') {
-        activatePro(request.key).then(sendResponse);
-        return true;
-    }
-
-    if (request.action === 'checkProStatus') {
-        isProActive().then(isPro => sendResponse({ isPro }));
-        return true;
-    }
-});
-
-async function handleProFeature(request, sendResponse) {
-    switch (request.action) {
-        case 'syncToCloud':
-            sendResponse(await cloudSync.syncToCloud());
-            break;
-        case 'syncFromCloud':
-            sendResponse(await cloudSync.syncFromCloud());
-            break;
-        case 'addSchedule':
-            sendResponse(await scheduler.addSchedule(request.rule));
-            break;
-        case 'getSchedule':
-            sendResponse(await scheduler.getSchedule());
-            break;
-        case 'getAnalytics':
-            sendResponse(await analytics.getDetailedStats());
-            break;
-        case 'autoOrganizeTabs':
-            sendResponse(await tabGroups.autoOrganize());
-            break;
-    }
-}
-
-console.log('[Pro v3.1] Loaded - all features fixed and working');
+// NOTE: Message handlers and alarm handlers are in background.js (unified)
+console.log('[Pro v3.1] Loaded - classes available for background.js');

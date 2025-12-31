@@ -393,56 +393,11 @@ class TabGraph {
     }
 }
 
-// Initialize engines
+// Initialize engines (exposed globally for background.js to use)
 const memoryProfiler = new MemoryProfiler();
 const entropyScorer = new EntropyScorer();
 const tabPredictor = new TabPredictor();
 const tabGraph = new TabGraph();
 
-// Track tab activations for prediction
-chrome.tabs.onActivated.addListener(async (activeInfo) => {
-    const tab = await chrome.tabs.get(activeInfo.tabId);
-    if (tab.url) {
-        entropyScorer.recordAccess(activeInfo.tabId, tab.url);
-
-        // Get previous tab for transition
-        const lastUrl = tabPredictor.lastDomain
-            ? `https://${tabPredictor.lastDomain}`
-            : null;
-        tabPredictor.recordTransition(lastUrl, tab.url);
-    }
-});
-
-// Message handlers
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'profileMemory') {
-        memoryProfiler.profileAllTabs().then(sendResponse);
-        return true;
-    }
-
-    if (request.action === 'getTabImportance') {
-        chrome.tabs.get(request.tabId).then(tab => {
-            sendResponse(entropyScorer.calculateImportance(tab));
-        });
-        return true;
-    }
-
-    if (request.action === 'predictNext') {
-        tabPredictor.getPredictedNeededTabs().then(sendResponse);
-        return true;
-    }
-
-    if (request.action === 'getTabClusters') {
-        tabGraph.buildGraph().then(() => {
-            sendResponse({ clusters: tabGraph.findClusters() });
-        });
-        return true;
-    }
-
-    if (request.action === 'getAccessEntropy') {
-        sendResponse({ entropy: entropyScorer.calculateAccessEntropy() });
-        return true;
-    }
-});
-
+// NOTE: Message handlers and tab.onActivated are in background.js (unified handler)
 console.log('[Core Engine] Memory profiler, entropy scorer, Markov predictor, graph analyzer loaded');

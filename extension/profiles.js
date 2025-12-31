@@ -157,39 +157,6 @@ async function resetProfile() {
     return { success: true };
 }
 
-// Message handler
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'applyProfile') {
-        applyProfile(request.profileId).then(sendResponse);
-        return true;
-    }
-
-    if (request.action === 'getCurrentProfile') {
-        getCurrentProfile().then(sendResponse);
-        return true;
-    }
-
-    if (request.action === 'resetProfile') {
-        resetProfile().then(sendResponse);
-        return true;
-    }
-
-    if (request.action === 'listProfiles') {
-        const profileList = Object.keys(PROFILES).map(id => ({
-            id,
-            name: PROFILES[id].name,
-            description: PROFILES[id].description
-        }));
-        sendResponse({ profiles: profileList });
-        return true;
-    }
-});
-
-// Restore active profile on startup
-chrome.runtime.onStartup.addListener(async () => {
-    const profile = await getCurrentProfile();
-    if (profile) {
-        console.log('[Profile] Restoring from startup:', profile);
-        await applyProfile(profile);
-    }
-});
+// NOTE: Message handler and onStartup are in background.js (unified)
+// Functions applyProfile, getCurrentProfile, resetProfile, listProfiles are called from background.js
+console.log('[Profiles] Profile system loaded');
