@@ -1,6 +1,13 @@
 // Chrome Tamer Core Engine v2.3 (Pressure-Aware Eviction)
 // Memory pressure monitoring + redundancy-penalized scoring
 
+// Import all engine modules
+try {
+    importScripts('core_engine.js', 'pro_v3.js', 'value_features.js');
+    console.log('[Background] All modules loaded');
+} catch (e) {
+    console.warn('[Background] Module load failed:', e);
+}
 const DEFAULT_CONFIG = {
     baseCost: 6,          // Base cost of keeping a tab loaded
     competitionFactor: 3, // Penalty for domain redundancy
