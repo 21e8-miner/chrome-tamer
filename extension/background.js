@@ -1,15 +1,15 @@
-// Chrome Tamer Core Engine v2.1 (Nash Equilibrium & Pressure-Aware)
-// Implements Game-Theoretic Resource Allocation [Dec 2025 Standard]
+// Chrome Tamer Core Engine v2.3 (Pressure-Aware Eviction)
+// Memory pressure monitoring + redundancy-penalized scoring
 
-const DEFAULT_NASH_CONFIG = {
-    baseCost: 8,          // Base metabolic cost of a tab
+const DEFAULT_CONFIG = {
+    baseCost: 6,          // Base cost of keeping a tab loaded
     competitionFactor: 3, // Penalty for domain redundancy
     benefitDecay: 120,    // Scalar for importance decay
     pressureWeight: 1.5,  // How much RAM pressure amplifies cost
     protectedDomains: ["youtube.com", "music.apple.com", "spotify.com", "meet.google.com", "localhost", "github.com"]
 };
 
-let currentConfig = { ...DEFAULT_NASH_CONFIG };
+let currentConfig = { ...DEFAULT_CONFIG };
 
 // --- Initialization ---
 chrome.runtime.onInstalled.addListener(async () => {
@@ -18,7 +18,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     await chrome.storage.local.set({
         systemStats: data.systemStats || { deallocated: 0, reclaimedMB: 0, equilibriumPressure: 0 },
         userExclusions: data.userExclusions || [],
-        config: data.config || DEFAULT_NASH_CONFIG
+        config: data.config || DEFAULT_CONFIG
     });
 
     if (data.config) {
