@@ -10,7 +10,8 @@
         "idle",
         "system.memory",
         "contextMenus",
-        "tabGroups"
+        "tabGroups",
+        "notifications"
     ],
     "host_permissions": [],
     "background": {

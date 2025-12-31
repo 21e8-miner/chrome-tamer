@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Focus Mode Active</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        p {
+            font-size: 18px;
+            color: #a0a0b0;
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .timer {
+            font-size: 48px;
+            font-weight: 800;
+            color: #00d4ff;
+            margin-bottom: 32px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .quote {
+            font-style: italic;
+            color: #6a6a8a;
+            max-width: 400px;
+            margin-top: 40px;
+            font-size: 14px;
+        }
+
+        .end-btn {
+            background: rgba(255, 100, 100, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.5);
+            color: #ff6666;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .end-btn:hover {
+            background: rgba(255, 100, 100, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="icon">🎯</div>
+    <h1>Stay Focused</h1>
+    <p>You blocked this site to help you concentrate. Your future self will thank you.</p>
+    <div class="timer" id="timer">--:--</div>
+    <button class="end-btn" id="endFocus">End Focus Early</button>
+    <p class="quote">"The successful warrior is the average person with laser-like focus." – Bruce Lee</p>
+
+    <script>
+        // Get remaining time
+        chrome.runtime.sendMessage({ action: 'getFocusStatus' }, (response) => {
+            if (response && response.active) {
+                updateTimer(response.remainingMinutes);
+            }
+        });
+
+        function updateTimer(minutes) {
+            const timer = document.getElementById('timer');
+            const hrs = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            timer.textContent = hrs > 0
+                ? `${hrs}h ${mins}m remaining`
+                : `${mins} minutes remaining`;
+        }
+
+        document.getElementById('endFocus').addEventListener('click', () => {
+            if (confirm('Are you sure? You set this focus time for a reason.')) {
+                chrome.runtime.sendMessage({ action: 'endFocus' }, () => {
+                    window.close();
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
