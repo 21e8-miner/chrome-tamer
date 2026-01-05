@@ -45,13 +45,13 @@ def update_repo_meta():
         print(f"❌ Failed to update topics: {resp_topics.status_code} {resp_topics.text}")
 
 def create_release():
-    print(f"--- Creating Release v2.1 ---")
+    print(f"--- Creating Release v2.2 ---")
     url = f"https://api.github.com/repos/{REPO}/releases"
     payload = {
-        "tag_name": "v2.1",
+        "tag_name": "v2.2",
         "target_commitish": "main",
-        "name": "v2.1 (Nash Equilibrium)",
-        "body": "First public release of the Equilibrium-Driven Pruning engine.\n\n### Features\n* **Nash Equilibrium Logic**: Replaces timers with Utility Scores.\n* **Hyperfocus Mode**: Middle-out compression for maximum RAM reclamation.\n* **Live Debugger**: View internal utility calculations in real-time.",
+        "name": "v2.2 (Nash Equilibrium)",
+        "body": "Second public release with Dynamic RAM Pressure Gating.\n\n### Features\n* **Equilibrium-Driven Pruning**: Integrates `chrome.system.memory` for real-time pressure awareness.\n* **Resource Scarcity Pricing**: Costs scale exponentially with RAM pressure.\n* **Smoothed Pressure EMA**: Prevents pruning on transient spikes.",
         "draft": False,
         "prerelease": False,
         "generate_release_notes": True
@@ -62,6 +62,45 @@ def create_release():
     else:
         print(f"❌ Failed to create release: {resp.status_code} {resp.text}")
 
+def upload_asset(release_id, file_path):
+    print(f"--- Uploading Asset {file_path} ---")
+    file_name = os.path.basename(file_path)
+    # GitHub uses a different domain for asset uploads
+    url = f"https://uploads.github.com/repos/{REPO}/releases/{release_id}/assets?name={file_name}"
+    
+    headers = {
+        **HEADERS,
+        "Content-Type": "application/zip"
+    }
+    
+    with open(file_path, "rb") as f:
+        data = f.read()
+        
+    resp = requests.post(url, headers=headers, data=data)
+    if resp.status_code == 201:
+        print(f"✅ Asset {file_name} uploaded.")
+    else:
+        print(f"❌ Failed to upload asset: {resp.status_code} {resp.text}")
+
+def get_latest_release():
+    url = f"https://api.github.com/repos/{REPO}/releases/latest"
+    resp = requests.get(url, headers=HEADERS)
+    if resp.status_code == 200:
+        return resp.json()["id"]
+    return None
+
 if __name__ == "__main__":
     update_repo_meta()
-    create_release()
+    
+    # Try to get existing release or create it
+    release_id = get_latest_release()
+    if not release_id:
+        create_release()
+        release_id = get_latest_release()
+    
+    if release_id:
+        zip_path = r"c:\Users\Bravias\.gemini\antigravity\playground\sidereal-solstice\webapp\dist\chrome_tamer_extension.zip"
+        if os.path.exists(zip_path):
+            upload_asset(release_id, zip_path)
+        else:
+            print(f"⚠️ Zip file not found at {zip_path}")

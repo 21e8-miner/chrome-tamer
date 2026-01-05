@@ -1,56 +1,44 @@
 # Chrome Tamer: Equilibrium-Driven Resource Allocation [v2.2]
 
-> *"Resource sparsity is corrected not by deletion, but by intelligent reallocation."*
+> *"Resource sparsity is corrected not by deletion, but by intelligent mechanism design."*
 
-**Chrome Tamer** is a high-performance system-wide browser optimizer. It combines a **Game-Theoretic Extension Engine** with a **Native Desktop Kernel** to maintain peak system performance, regardless of how many tabs you have open.
-
-# Chrome Tamer 🦁
-**Memory-Pressure Eviction Engine for Chromium**
-
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-blue)
-![Build](https://img.shields.io/badge/Build-MV3%20Compliant-green)
-![Version](https://img.shields.io/badge/Version-v2.3-orange)
+**Chrome Tamer** is a high-performance system-wide browser optimizer. It treats browser tabs as autonomous players in a **Non-Cooperative Resource Game**, enforcing a **Nash Equilibrium** where tab residence is strictly gated by its marginal utility relative to system-wide opportunity cost.
 
 ---
 
-## What It Does
+## The Equilibrium Engine (v2.4)
 
-Chrome Tamer is a **memory-pressure-aware tab manager** that automatically discards tabs when system RAM is low. Instead of relying on fixed timers or manual tab management, it:
+Chrome Tamer replaces crude LRU heuristics with a dynamic **Pruning Engine** that monitors system memory pressure in real-time.
 
-1. **Monitors system RAM** via `chrome.system.memory.getInfo()` every minute
-2. **Only acts when RAM usage exceeds 75%** (configurable threshold)
-3. **Scores background tabs** using: recency, domain redundancy, and system pressure
-4. **Discards low-utility tabs** using `chrome.tabs.discard` (tabs stay visible, reload on revisit)
+1. **Memory-Pressure Awareness**: Integrates `chrome.system.memory` to gate all pruning actions.
+2. **Social Cost Pricing**: As RAM usage increases, the "tax" (cost) of keeping a tab open escalates dynamically.
+3. **Redundancy Penalty**: Domain-level externalities are penalized non-linearly to prevent "Tab Swarming".
+4. **Transparent Scoring**: The Live Debugger exposes the internal utility calculations for every tab.
 
-Unlike basic tab suspenders, Chrome Tamer penalizes **domain redundancy** (e.g., 20 duplicate documentation tabs) and adapts scoring based on **real-time memory headroom**.
+### The Scoring Formula (Mechanism Design)
+
+The system calculates a **Utility Score (U)** for each tab:
+
+```
+U(t) = B(t) - [C_base(P) + C_redundancy(D, P) + C_pressure(P)]
+```
+
+Where:
+- **B(t)**: **Individual Benefit**. Decays via `BenefitDecay / (IdleTime + 1)`.
+- **C_base(P)**: **Dynamic Base Cost**. Scaled by system pressure `P` to simulate higher scarcity.
+- **C_redundancy(D, P)**: **Redundancy Externality**. Non-linear penalty for multiple tabs from the same domain `D`, sharpened when pressure `P` is high.
+- **C_pressure(P)**: **System Pressure Gate**. Direct quadratic penalty based on current RAM headroom.
+
+If `U(t) < 0`, the tab is considered a **Dominated Strategy** and is deallocated via `chrome.tabs.discard()`.
 
 ---
 
-## The Engine
+## Features
 
-### Browser Extension (v2.3)
-- **Manifest V3 compliant**: Uses `chrome.alarms` for reliable scheduling (service workers go idle after 30s)
-- **Pressure-gated pruning**: Only discards when `availableCapacity / capacity < 0.25`
-- **Transparent scoring**: Shows "why" each tab is targeted (Idle, Redundant, Sys Pressure, or Aged Out)
-- **Protected contexts**: Built-in safelist for GitHub, Meet, YouTube, localhost
-- **Safety rails**: Never discards pinned, audible, or active tabs
-
-**Scoring Formula**:
-```
-Utility(tab) = (BenefitDecay / (IdleMinutes + 1)) - (BaseCost + RedundancyPenalty + PressurePenalty)
-
-where:
-  RedundancyPenalty = CompetitionFactor × (DomainCount - 1)^1.2
-  PressurePenalty = MemoryPressure × PressureWeight × 10
-```
-
-If `Utility(tab) < 0`, the tab is discarded.
-
-### Native Desktop Kernel (Optional)
-For system-level optimization beyond what browser extensions can achieve:
-- **Windows**: E-Core isolation via CPU affinity, `EmptyWorkingSet` for memory squashing
-- **macOS**: Background QoS via `taskpolicy -b`, priority renicing to IDLE class
-- **Both**: Active focus detection to boost foreground processes to high priority
+- **Nash Equilibrium Pruning**: Adaptive eviction based on real-time system state.
+- **Hyperfocus Mode**: "Middle-out" compression that aggressively targets low-utility clusters.
+- **Built-in Safelist**: Intelligent protection for Meet, YouTube, GitHub, and localhost.
+- **Cross-Platform**: Optimized for Windows (WorkingSet management) and macOS (QoS/Renice).
 
 ---
 
@@ -60,7 +48,7 @@ For system-level optimization beyond what browser extensions can achieve:
 1. Clone the repo: `git clone https://github.com/21e8-miner/chrome-tamer.git`
 2. Open `chrome://extensions` → Enable "Developer mode"
 3. Click "Load unpacked" → Select the `extension/` folder
-4. The extension will start monitoring immediately
+4. (Optional) Download the pre-built `.zip` from the [Latest Release](https://github.com/21e8-miner/chrome-tamer/releases).
 
 ### Native Kernel (Advanced - Optional)
 ```bash

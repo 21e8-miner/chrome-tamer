@@ -15,11 +15,13 @@ try {
 // CONFIGURATION
 // ============================================
 const DEFAULT_CONFIG = {
-    baseCost: 6,
-    competitionFactor: 3,
-    benefitDecay: 120,
-    pressureWeight: 1.5,
-    protectedDomains: ["youtube.com", "music.apple.com", "spotify.com", "meet.google.com", "localhost", "github.com"]
+    baseCost: 10,
+    competitionFactor: 5,
+    benefitDecay: 150,
+    pressureWeight: 2.0,
+    criticalPressure: 0.90, // Aggressive pruning above this
+    warningPressure: 0.70,  // Start pruning above this
+    protectedDomains: ["youtube.com", "music.apple.com", "spotify.com", "meet.google.com", "localhost", "github.com", "docs.google.com", "sheets.google.com"]
 };
 
 let currentConfig = { ...DEFAULT_CONFIG };
@@ -109,18 +111,23 @@ function getMemoryPressure() {
 }
 
 async function pruneByMemoryPressure() {
-    const pressure = await getMemoryPressure();
-    const PRESSURE_THRESHOLD = 0.75;
+    const rawPressure = await getMemoryPressure();
 
-    if (pressure < PRESSURE_THRESHOLD) {
+    // SMOOTHED PRESSURE (EMA)
+    // We update this globally once per cycle to avoid jitter in utility calculations.
+    lastPressureValue = (lastPressureValue * 0.4) + (rawPressure * 0.6);
+    const pressure = lastPressureValue;
+
+    // Check if we even need to prune
+    if (pressure < currentConfig.warningPressure) {
         console.log(`[Skip] Memory pressure acceptable (${(pressure * 100).toFixed(1)}%)`);
         await chrome.storage.local.set({ lastPressure: pressure, lastPruned: 0 });
         return;
     }
 
-    console.log(`[Prune] Memory pressure high (${(pressure * 100).toFixed(1)}%), starting eviction...`);
+    console.log(`[Prune] Memory pressure elevated (${(pressure * 100).toFixed(1)}%), starting equilibrium search...`);
 
-    const tabs = await chrome.tabs.query({ active: false, discarded: false, audible: false });
+    const tabs = await chrome.tabs.query({ active: false, discarded: false, audible: false, pinned: false });
     const { userExclusions } = await chrome.storage.local.get("userExclusions");
 
     const domainCounts = {};
@@ -133,16 +140,30 @@ async function pruneByMemoryPressure() {
         } catch (e) { }
     });
 
+    // Sort tabs by utility (lowest first) to discard the least valuable ones first
+    const scoredTabs = tabs.map(tab => {
+        const { score, reason } = calculateTabUtility(tab, domainCounts, pressure);
+        return { tab, score, reason };
+    }).sort((a, b) => a.score - b.score);
+
     let prunedCount = 0;
-    for (const tab of tabs) {
+    for (const { tab, score, reason } of scoredTabs) {
         if (!tab.url || isProtected(tab.url, userExclusions)) continue;
 
-        const { score, reason } = calculateTabUtility(tab, domainCounts, pressure);
-
+        // If score is negative, it's a dominated strategy in the resource game
         if (score < 0) {
-            console.log(`[Discard] ${tab.title} (Score: ${score.toFixed(2)}, ${reason})`);
+            console.log(`[Discard] ${tab.title} (Score: ${score.toFixed(2)}, Reason: ${reason})`);
             await deallocateResource(tab);
             prunedCount++;
+
+            // Re-check pressure after some discards to see if we reached equilibrium
+            if (prunedCount % 3 === 0) {
+                const currentPressure = await getMemoryPressure();
+                if (currentPressure < currentConfig.warningPressure) {
+                    console.log(`[Equilibrium] Resource equilibrium achieved after ${prunedCount} discards.`);
+                    break;
+                }
+            }
         }
     }
 
@@ -160,26 +181,50 @@ function isProtected(url, userExclusions = []) {
 }
 
 function calculateTabUtility(tab, domainCounts, pressure) {
+    // 1. INDIVIDUAL BENEFIT (B)
+    // Benefit decays as time since last interaction increases.
     const idleTimeMinutes = (Date.now() - (tab.lastAccessed || Date.now())) / 1000 / 60;
-    const benefit = currentConfig.benefitDecay / (Math.max(0.1, idleTimeMinutes) + 1);
+    const decay = currentConfig.benefitDecay;
+    let benefit = decay / (Math.max(0.1, idleTimeMinutes) + 1);
 
-    lastPressureValue = (lastPressureValue * 0.8) + (pressure * 0.2);
+    // 1b. INFO-THEORETIC WEIGHTING
+    // Add weights from entropy (uniqueness) and Markov predictor (future need)
+    if (typeof entropyScorer !== 'undefined') {
+        const info = entropyScorer.calculateImportance(tab);
+        benefit *= (1 + (info.surprise || 0) * 0.2); // Surprise tabs get a "rarity bonus"
+    }
 
+    // 2. RESOURCE SCARCITY PRICING
+    // The "Social Cost" factor. As RAM pressure (P) increases, the cost of occupancy
+    // escalates non-linearly to force higher-utility activities to the top.
+    const P = lastPressureValue;
+
+    // 3. DYNAMIC SOCIAL COST (C)
     let domain = "";
     try { domain = new URL(tab.url).hostname; } catch (e) { }
 
     const redundancy = domainCounts[domain] || 1;
-    const baseCost = currentConfig.baseCost;
-    const competitionCost = currentConfig.competitionFactor * Math.pow(redundancy - 1, 1.2);
-    const pressurePenalty = lastPressureValue * currentConfig.pressureWeight * 10;
 
-    const cost = baseCost + competitionCost + pressurePenalty;
-    const score = benefit - cost;
+    // Base cost escalates exponentially as we hit RAM limits (Pricing Scarcity)
+    // Formula: C_base * e^(k * P) where k=3 simulations hyper-inflation of resource value
+    const dynamicBaseCost = currentConfig.baseCost * Math.exp(3.0 * P);
 
-    let reason = "Idle";
-    if (redundancy > 1 && (competitionCost > baseCost)) reason = "Redundant";
-    if (pressurePenalty > competitionCost && pressurePenalty > baseCost) reason = "Pressure";
-    if (idleTimeMinutes > 60) reason = "Aged";
+    // Redundancy penalty scales non-linearly when memory is tight
+    const adaptiveCompetitionFactor = currentConfig.competitionFactor * (1 + P * 3);
+    const competitionCost = adaptiveCompetitionFactor * Math.pow(redundancy - 1, 2);
+
+    // Direct pressure penalty (cubic)
+    const pressurePenalty = Math.pow(P, 3) * currentConfig.pressureWeight * 100;
+
+    const totalCost = dynamicBaseCost + competitionCost + pressurePenalty;
+    const score = benefit - totalCost;
+
+    // Pruning Reason Selection
+    let reason = "Equilibrium";
+    if (redundancy > 1 && (competitionCost > dynamicBaseCost)) reason = "Redundancy Externalities";
+    if (pressurePenalty > competitionCost && pressurePenalty > dynamicBaseCost) reason = "System Pressure Gate";
+    if (idleTimeMinutes > 180) reason = "Information Decay";
+    if (score < -50) reason = "Dominated Strategy";
 
     return { score, reason };
 }
